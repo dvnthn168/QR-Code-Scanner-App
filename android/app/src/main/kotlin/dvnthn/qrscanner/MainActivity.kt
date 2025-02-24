@@ -1,7 +1,6 @@
 package dvnthn.qrscanner
 
 import com.dvnthn.qrscanner.channel.CameraPreviewFactory
-import dvnthn.qrscanner.channel.MethodChannelHandler
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 

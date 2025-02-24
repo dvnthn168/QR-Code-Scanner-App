@@ -1,6 +1,7 @@
 
 package com.dvnthn.qrscanner.channel
 
+import android.app.Activity
 import android.content.Context
 import androidx.lifecycle.LifecycleOwner
 import dvnthn.qrscanner.channel.CameraPreviewView
@@ -14,6 +15,7 @@ class CameraPreviewFactory(
     private val lifecycleOwner: LifecycleOwner
 ) : PlatformViewFactory(StandardMessageCodec.INSTANCE) {
     override fun create(context: Context, id: Int, args: Any?): PlatformView {
-        return CameraPreviewView(context, lifecycleOwner, id, messenger)
+        val activityContext = if (context is Activity) context else lifecycleOwner as Activity
+        return CameraPreviewView(activityContext, lifecycleOwner, id, messenger)
     }
 }

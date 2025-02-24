@@ -35,10 +35,7 @@ class CameraPreviewView(
         )
     }
 
-    // Biến để kiểm tra xem camera đã được khởi tạo chưa
     private var initialized = false
-
-    // Tạo MethodChannel riêng cho view này với tên chứa id
     private val channel: MethodChannel =
         MethodChannel(messenger, "dvnthn.qrscanner/camera_view_$id")
 
@@ -48,7 +45,6 @@ class CameraPreviewView(
 
 
     init {
-        // Lắng nghe yêu cầu initialize từ Flutter
         channel.setMethodCallHandler { call, result ->
             when (call.method) {
                 "initialize" -> {
