@@ -41,13 +41,7 @@ class QRScannerView extends StatelessWidget {
     return Obx(
       () =>
           controller.isCameraVisible.value
-              ? Expanded(
-                flex: 3,
-                child: AndroidView(
-                  viewType: 'dvnthn.qrscanner/camera_view',
-                  onPlatformViewCreated: controller.onPlatformViewCreated,
-                ),
-              )
+              ? _qrCodePreview(controller)
               : Expanded(
                 flex: 3,
                 child: Container(
@@ -66,6 +60,44 @@ class QRScannerView extends StatelessWidget {
                   ),
                 ),
               ),
+    );
+  }
+
+  Widget _qrCodePreview(QRScannerController controller) {
+    return Expanded(
+      flex: 3,
+      child: Stack(
+        children: [
+          AndroidView(
+            viewType: 'dvnthn.qrscanner/camera_view',
+            onPlatformViewCreated: controller.onPlatformViewCreated,
+          ),
+          if (controller.qrData.value != null)
+            Positioned(
+              left:
+                  (controller.qrData.value!["boundingBox"]["left"] as num)
+                      .toDouble(),
+              top:
+                  (controller.qrData.value!["boundingBox"]["top"] as num)
+                      .toDouble(),
+              width:
+                  ((controller.qrData.value!["boundingBox"]["right"] as num) -
+                          (controller.qrData.value!["boundingBox"]["left"]
+                              as num))
+                      .toDouble(),
+              height:
+                  ((controller.qrData.value!["boundingBox"]["bottom"] as num) -
+                          (controller.qrData.value!["boundingBox"]["top"]
+                              as num))
+                      .toDouble(),
+              child: Container(
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.green, width: 2),
+                ),
+              ),
+            ),
+        ],
+      ),
     );
   }
 

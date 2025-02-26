@@ -9,6 +9,8 @@ class QRScannerController extends GetxController {
 
   var isCameraVisible = false.obs;
 
+  var qrData = Rx<Map<String, dynamic>?>(null);
+  
   Future<void> startCamera() async {
     try {
       await cameraChannel.startCamera();
@@ -27,16 +29,37 @@ class QRScannerController extends GetxController {
     } catch (e) {}
   }
 
-  void onPlatformViewCreated(int id) {
+void onPlatformViewCreated(int id) async {
     final channel = MethodChannel('dvnthn.qrscanner/camera_view_$id');
-    channel.invokeMethod('initialize');
+    
+    // Đăng ký handler để nhận dữ liệu từ native khi mã QR được quét
+    channel.setMethodCallHandler((call) async {
+      if (call.method == "onQRCodeDetected") {
+        Map<String, dynamic> data = Map<String, dynamic>.from(call.arguments);
+        qrResult.value = data["qrValue"];
+        qrData.value = data;
+        print("QR Data: $data");
+      }
+    });
+    
+    try {
+      final result = await channel.invokeMethod('initialize');
+      print("Native result: $result");
+    } on PlatformException catch (e) {
+      if (e.code == "PERMISSION_NOT_GRANTED") {
+        _hideCamera();
+        print("Camera permission not granted");
+      } else {
+        print("Error initializing camera: ${e.message}");
+      }
+    }
   }
 
   void showCamera() {
     isCameraVisible.value = true;
   }
 
-  void hideCamera() {
+  _hideCamera() {
     isCameraVisible.value = false;
   }
 }

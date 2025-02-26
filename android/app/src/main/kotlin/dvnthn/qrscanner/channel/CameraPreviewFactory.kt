@@ -5,6 +5,7 @@ import android.app.Activity
 import android.content.Context
 import androidx.lifecycle.LifecycleOwner
 import dvnthn.qrscanner.channel.CameraPreviewView
+import io.flutter.Log
 import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.StandardMessageCodec
 import io.flutter.plugin.platform.PlatformView
