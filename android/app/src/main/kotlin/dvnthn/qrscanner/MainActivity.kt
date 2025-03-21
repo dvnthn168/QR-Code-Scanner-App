@@ -17,7 +17,7 @@ class MainActivity : FlutterActivity(){
 
         flutterEngine.platformViewsController.registry.registerViewFactory(
             "dvnthn.qrscanner/camera_view",
-            CameraPreviewFactory(flutterEngine.dartExecutor.binaryMessenger, this)
+            CameraPreviewFactory(flutterEngine.dartExecutor.binaryMessenger, this),
         )
     }
 

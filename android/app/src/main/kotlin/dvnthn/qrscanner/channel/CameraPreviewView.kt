@@ -112,19 +112,24 @@ class CameraPreviewView(
                         it.setSurfaceProvider(previewView.surfaceProvider)
                     }
 
-                    val imageAnalysis = ImageAnalysis.Builder().build().also { analysis ->
-                        analysis.setAnalyzer(analysisExecutor) { imageProxy ->
-                            processImage(imageProxy)
+                    val imageAnalysis = ImageAnalysis.Builder()
+                        .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST) // Chỉ xử lý khung hình mới nhất
+                        .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_YUV_420_888) // Tối ưu định dạng ảnh
+                        .build().also { analysis ->
+                            analysis.setAnalyzer(analysisExecutor) { imageProxy ->
+                                processImage(imageProxy)
+                            }
                         }
-                    }
+
 
                     // Chọn camera sau (BACK)
                     val cameraSelector = CameraSelector.Builder()
                         .requireLensFacing(CameraSelector.LENS_FACING_BACK)
                         .build()
 
+                    cameraProvider.unbindAll()
                     // Bind preview vào lifecycle của Activity
-                    cameraProvider.bindToLifecycle(lifecycleOwner, cameraSelector, preview)
+                    cameraProvider.bindToLifecycle(lifecycleOwner, cameraSelector, preview, imageAnalysis)
                     initialized = true
                 } catch (e: Exception) {
                     Log.e("CameraPreview", "Error initializing camera: ${e.message}", e)

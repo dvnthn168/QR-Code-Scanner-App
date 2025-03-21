@@ -10,7 +10,7 @@ class QRScannerController extends GetxController {
   var isCameraVisible = false.obs;
 
   var qrData = Rx<Map<String, dynamic>?>(null);
-  
+
   Future<void> startCamera() async {
     try {
       await cameraChannel.startCamera();
@@ -29,9 +29,9 @@ class QRScannerController extends GetxController {
     } catch (e) {}
   }
 
-void onPlatformViewCreated(int id) async {
+  void onPlatformViewCreated(int id) async {
     final channel = MethodChannel('dvnthn.qrscanner/camera_view_$id');
-    
+
     // Đăng ký handler để nhận dữ liệu từ native khi mã QR được quét
     channel.setMethodCallHandler((call) async {
       if (call.method == "onQRCodeDetected") {
@@ -41,7 +41,7 @@ void onPlatformViewCreated(int id) async {
         print("QR Data: $data");
       }
     });
-    
+
     try {
       final result = await channel.invokeMethod('initialize');
       print("Native result: $result");

@@ -1,4 +1,7 @@
+import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:get/get_state_manager/get_state_manager.dart';
 import 'package:qr_code_scanner_app/modules/qrscanner/qrscanner_controller.dart';
 
@@ -71,31 +74,44 @@ class QRScannerView extends StatelessWidget {
           AndroidView(
             viewType: 'dvnthn.qrscanner/camera_view',
             onPlatformViewCreated: controller.onPlatformViewCreated,
+            layoutDirection: TextDirection.ltr,
+            hitTestBehavior: PlatformViewHitTestBehavior.transparent,
           ),
-          if (controller.qrData.value != null)
-            Positioned(
-              left:
-                  (controller.qrData.value!["boundingBox"]["left"] as num)
-                      .toDouble(),
-              top:
-                  (controller.qrData.value!["boundingBox"]["top"] as num)
-                      .toDouble(),
-              width:
-                  ((controller.qrData.value!["boundingBox"]["right"] as num) -
-                          (controller.qrData.value!["boundingBox"]["left"]
-                              as num))
-                      .toDouble(),
-              height:
-                  ((controller.qrData.value!["boundingBox"]["bottom"] as num) -
-                          (controller.qrData.value!["boundingBox"]["top"]
-                              as num))
-                      .toDouble(),
-              child: Container(
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.green, width: 2),
-                ),
+
+          Positioned(
+            top: 50,
+            left: 50,
+            child: Container(color: Colors.amber, height: 100, width: 100),
+          ),
+          // if (controller.qrData.value != null)
+          //   Positioned(
+          //     left:
+          //         (controller.qrData.value!["boundingBox"]["left"] as num)
+          //             .toDouble(),
+          //     top:
+          //         (controller.qrData.value!["boundingBox"]["top"] as num)
+          //             .toDouble(),
+          //     width:
+          //         ((controller.qrData.value!["boundingBox"]["right"] as num) -
+          //                 (controller.qrData.value!["boundingBox"]["left"]
+          //                     as num))
+          //             .toDouble(),
+          //     height:
+          //         ((controller.qrData.value!["boundingBox"]["bottom"] as num) -
+          //                 (controller.qrData.value!["boundingBox"]["top"]
+          //                     as num))
+          //             .toDouble(),
+          Positioned(
+            top: 100,
+            left: 100,
+            child: Container(
+              width: 100,
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.green, width: 2),
               ),
+              // ),
             ),
+          ),
         ],
       ),
     );
