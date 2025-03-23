@@ -1,6 +1,9 @@
+import 'dart:isolate';
+
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:qr_code_scanner_app/channels/method_channel_handler.dart';
+import 'package:qr_code_scanner_app/db/database_helper.dart';
 
 class QRScannerController extends GetxController {
   final cameraChannel = MethodChannelHandler().cameraChannel;
@@ -10,6 +13,24 @@ class QRScannerController extends GetxController {
   var isCameraVisible = false.obs;
 
   var qrData = Rx<Map<String, dynamic>?>(null);
+
+  var qrDataHistory = <Map<String, dynamic>>[].obs;
+
+  final DatabaseHelper dbHelper = DatabaseHelper();
+
+  Set qrContentHistory = {};
+
+  @override
+  void onInit() {
+    super.onInit();
+    loadQRCodeHistory();
+  }
+
+  Future<void> loadQRCodeHistory() async {
+    final data = await dbHelper.getScanHistory();
+    qrDataHistory.assignAll(data);
+    qrDataHistory.forEach((item) => qrContentHistory.add(item["content"]));
+  }
 
   Future<void> startCamera() async {
     try {
@@ -23,22 +44,16 @@ class QRScannerController extends GetxController {
     }
   }
 
-  Future<void> stopCamera() async {
-    try {
-      await cameraChannel.stopCamera();
-    } catch (e) {}
-  }
-
   void onPlatformViewCreated(int id) async {
     final channel = MethodChannel('dvnthn.qrscanner/camera_view_$id');
 
-    // Đăng ký handler để nhận dữ liệu từ native khi mã QR được quét
     channel.setMethodCallHandler((call) async {
       if (call.method == "onQRCodeDetected") {
         Map<String, dynamic> data = Map<String, dynamic>.from(call.arguments);
         qrResult.value = data["qrValue"];
         qrData.value = data;
-        print("QR Data: $data");
+
+        handleQRCodeInBackground(data, dbHelper);
       }
     });
 
@@ -52,6 +67,16 @@ class QRScannerController extends GetxController {
       } else {
         print("Error initializing camera: ${e.message}");
       }
+    }
+  }
+
+  Future<void> handleQRCodeInBackground(
+    Map<String, dynamic> data,
+    DatabaseHelper dbHelper,
+  ) async {
+    if (!qrContentHistory.contains(data["qrValue"])) {
+      await dbHelper.insertScan(data["qrValue"]);
+      await loadQRCodeHistory();
     }
   }
 

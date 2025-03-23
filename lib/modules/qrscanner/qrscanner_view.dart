@@ -30,7 +30,7 @@ class QRScannerView extends StatelessWidget {
 
               const SizedBox(height: 16),
 
-              _scannerHistory(),
+              _scannerHistory(controller),
             ],
           ),
         );
@@ -158,7 +158,7 @@ class QRScannerView extends StatelessWidget {
     );
   }
 
-  Widget _scannerHistory() {
+  Widget _scannerHistory(QRScannerController controller) {
     return Expanded(
       flex: 2,
       child: Container(
@@ -172,20 +172,19 @@ class QRScannerView extends StatelessWidget {
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
-            Expanded(
-              child: ListView(
-                children: const [
-                  ListTile(
-                    leading: Icon(Icons.qr_code, color: Colors.blueAccent),
-                    title: Text('QR Code 1: Example Data'),
-                    trailing: Icon(Icons.arrow_forward_ios, size: 16),
-                  ),
-                  ListTile(
-                    leading: Icon(Icons.qr_code, color: Colors.blueAccent),
-                    title: Text('QR Code 2: Example Data'),
-                    trailing: Icon(Icons.arrow_forward_ios, size: 16),
-                  ),
-                ],
+            Obx(
+              () => Expanded(
+                child: ListView.builder(
+                  itemCount: controller.qrDataHistory.length,
+                  itemBuilder: (context, index) {
+                    var item = controller.qrDataHistory[index];
+                    return ListTile(
+                      leading: Icon(Icons.qr_code, color: Colors.blueAccent),
+                      title: Text(item['content']),
+                      trailing: Icon(Icons.arrow_forward_ios, size: 16),
+                    );
+                  },
+                ),
               ),
             ),
           ],

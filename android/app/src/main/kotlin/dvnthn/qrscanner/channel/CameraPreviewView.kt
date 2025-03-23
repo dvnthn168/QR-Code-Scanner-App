@@ -57,6 +57,9 @@ class CameraPreviewView(
 
     private val analysisExecutor: ExecutorService = Executors.newSingleThreadExecutor()
 
+    private var lastQRValue: String? = null
+    private var lastSentTime: Long = 0
+    private val DEBOUNCE_TIME_MS = 1000
 
     init {
         channel.setMethodCallHandler { call, result ->
@@ -156,28 +159,30 @@ class CameraPreviewView(
             val scanner = BarcodeScanning.getClient(options)
             scanner.process(inputImage)
                 .addOnSuccessListener { barcodes ->
+                    val currentTime = System.currentTimeMillis()
                     for (barcode in barcodes) {
                         barcode.rawValue?.let { qrValue ->
-                            val boundingBox = barcode.boundingBox
-                            val qrData = mapOf(
-                                "qrValue" to qrValue,
-                                "boundingBox" to mapOf(
-                                    "left" to (boundingBox?.left ?: 0),
-                                    "top" to (boundingBox?.top ?: 0),
-                                    "right" to (boundingBox?.right ?: 0),
-                                    "bottom" to (boundingBox?.bottom ?: 0),
-                                    "width" to (boundingBox?.width() ?: 0),
-                                    "height" to (boundingBox?.height() ?: 0),
-                                ),
-                                "cameraWidth" to imageProxy.width,
-                                "cameraHeight" to imageProxy.height,
-                            )
-                            Log.i("QRScanner", "QR Code detected: $qrData")
-                            channel.invokeMethod("onQRCodeDetected", qrData)
+                            if (qrValue != lastQRValue && (currentTime - lastSentTime) > DEBOUNCE_TIME_MS) {
+                                lastQRValue = qrValue
+                                lastSentTime = currentTime
+                                val boundingBox = barcode.boundingBox
+                                val qrData = mapOf(
+                                    "qrValue" to qrValue,
+                                    "boundingBox" to mapOf(
+                                        "left" to (boundingBox?.left ?: 0),
+                                        "top" to (boundingBox?.top ?: 0),
+                                        "right" to (boundingBox?.right ?: 0),
+                                        "bottom" to (boundingBox?.bottom ?: 0),
+                                        "width" to (boundingBox?.width() ?: 0),
+                                        "height" to (boundingBox?.height() ?: 0),
+                                    ),
+                                    "cameraWidth" to imageProxy.width,
+                                    "cameraHeight" to imageProxy.height,
+                                )
+                                Log.i("QRScanner", "QR Code detected: $qrData")
+                                channel.invokeMethod("onQRCodeDetected", qrData)
+                            }
                         }
-                    }
-                    if(barcodes.isEmpty()){
-                        channel.invokeMethod("onQRCodeDetected", null)
                     }
                 }
                 .addOnFailureListener { e ->
