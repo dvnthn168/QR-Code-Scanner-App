@@ -1,5 +1,3 @@
-import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:get/get_state_manager/get_state_manager.dart';
@@ -69,50 +67,55 @@ class QRScannerView extends StatelessWidget {
   Widget _qrCodePreview(QRScannerController controller) {
     return Expanded(
       flex: 3,
-      child: Stack(
-        children: [
-          AndroidView(
-            viewType: 'dvnthn.qrscanner/camera_view',
-            onPlatformViewCreated: controller.onPlatformViewCreated,
-            layoutDirection: TextDirection.ltr,
-            hitTestBehavior: PlatformViewHitTestBehavior.transparent,
-          ),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final cameraWidth =
+              (controller.qrData.value?["cameraWidth"] ?? 1 as num).toDouble();
+          final cameraHeight =
+              (controller.qrData.value?["cameraHeight"] ?? 1 as num).toDouble();
+          double scaleX = constraints.maxWidth / cameraWidth;
+          double scaleY = constraints.maxHeight / cameraHeight;
+          print("scaleX: $scaleX, scaleY: $scaleY");
 
-          Positioned(
-            top: 50,
-            left: 50,
-            child: Container(color: Colors.amber, height: 100, width: 100),
-          ),
-          // if (controller.qrData.value != null)
-          //   Positioned(
-          //     left:
-          //         (controller.qrData.value!["boundingBox"]["left"] as num)
-          //             .toDouble(),
-          //     top:
-          //         (controller.qrData.value!["boundingBox"]["top"] as num)
-          //             .toDouble(),
-          //     width:
-          //         ((controller.qrData.value!["boundingBox"]["right"] as num) -
-          //                 (controller.qrData.value!["boundingBox"]["left"]
-          //                     as num))
-          //             .toDouble(),
-          //     height:
-          //         ((controller.qrData.value!["boundingBox"]["bottom"] as num) -
-          //                 (controller.qrData.value!["boundingBox"]["top"]
-          //                     as num))
-          //             .toDouble(),
-          Positioned(
-            top: 100,
-            left: 100,
-            child: Container(
-              width: 100,
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.green, width: 2),
+          return Stack(
+            children: [
+              AndroidView(
+                viewType: 'dvnthn.qrscanner/camera_view',
+                onPlatformViewCreated: controller.onPlatformViewCreated,
+                layoutDirection: TextDirection.ltr,
+                hitTestBehavior: PlatformViewHitTestBehavior.transparent,
               ),
-              // ),
-            ),
-          ),
-        ],
+
+              if (controller.qrData.value != null)
+                Positioned(
+                  left:
+                      (controller.qrData.value!["boundingBox"]["left"] as num)
+                          .toDouble() *
+                      scaleX,
+                  top:
+                      (controller.qrData.value!["boundingBox"]["top"] as num)
+                          .toDouble() *
+                      scaleY,
+
+                  child: Container(
+                    width:
+                        (controller.qrData.value!["boundingBox"]["width"]
+                                as num)
+                            .toDouble() *
+                        scaleX,
+                    height:
+                        (controller.qrData.value!["boundingBox"]["height"]
+                                as num)
+                            .toDouble() *
+                        scaleY,
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.green, width: 2),
+                    ),
+                  ),
+                ),
+            ],
+          );
+        },
       ),
     );
   }

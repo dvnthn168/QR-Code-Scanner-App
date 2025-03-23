@@ -5,6 +5,7 @@ import android.Manifest
 import android.app.Activity
 import android.content.Context
 import android.content.pm.PackageManager
+import android.view.TextureView
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.OptIn
@@ -37,6 +38,7 @@ class CameraPreviewView(
     messenger: BinaryMessenger
 ) : PlatformView {
 
+    private val textureView: TextureView = TextureView(context)
 
     private val previewView: PreviewView = PreviewView(context).apply {
         layoutParams = ViewGroup.LayoutParams(
@@ -109,6 +111,7 @@ class CameraPreviewView(
 
                     // Tạo preview và gán surfaceProvider cho PreviewView
                     val preview = Preview.Builder().build().also {
+                        previewView.implementationMode = PreviewView.ImplementationMode.COMPATIBLE
                         it.setSurfaceProvider(previewView.surfaceProvider)
                     }
 
@@ -162,12 +165,19 @@ class CameraPreviewView(
                                     "left" to (boundingBox?.left ?: 0),
                                     "top" to (boundingBox?.top ?: 0),
                                     "right" to (boundingBox?.right ?: 0),
-                                    "bottom" to (boundingBox?.bottom ?: 0)
-                                )
+                                    "bottom" to (boundingBox?.bottom ?: 0),
+                                    "width" to (boundingBox?.width() ?: 0),
+                                    "height" to (boundingBox?.height() ?: 0),
+                                ),
+                                "cameraWidth" to imageProxy.width,
+                                "cameraHeight" to imageProxy.height,
                             )
                             Log.i("QRScanner", "QR Code detected: $qrData")
                             channel.invokeMethod("onQRCodeDetected", qrData)
                         }
+                    }
+                    if(barcodes.isEmpty()){
+                        channel.invokeMethod("onQRCodeDetected", null)
                     }
                 }
                 .addOnFailureListener { e ->
